@@ -1,0 +1,68 @@
+* {
+  font-family: 'Quicksand', sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+nav {
+    float: right;
+    margin-right: 2em;
+    margin-top: 2.5em;
+}
+
+nav ul li {
+    display: inline-block;
+    margin-left: 1em;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #FAFAFA;
+}
+
+header {
+    height: 11em;
+    background-color: #363636;
+}
+
+header div p a img {
+    height: 9em;
+}
+
+.feature {
+  margin-top: 3em;
+}
+
+.feature-icon {
+  height: 8em;
+  float: left;
+  margin-left: 1em;
+}
+
+.feature-text {
+  float: right;
+  margin-right: 1em;
+  margin-top: 4.6em;
+}
+
+header #logo {
+    float: left;
+    display: inline-block;
+    margin: 0 0 1em 2em;
+}
+
+header #logo p {
+  margin: 0;
+}
+
+#github-link {
+  float: left;
+  margin: 0 auto;
+  padding: 0 40%;
+}
+
+#github-link-image {
+    height: 8em;
+}

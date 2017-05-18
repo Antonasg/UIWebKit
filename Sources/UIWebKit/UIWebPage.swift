@@ -22,9 +22,10 @@
 
 import Foundation
 import Vapor
+import HTTP
 
 /// Represents a web page and contains all the HTML elements.
-public class UIWebPage {
+open class UIWebPage {
     
     /// The head in a web page.
     public var head: UIElement
@@ -39,42 +40,52 @@ public class UIWebPage {
     public var footer: UIElement
     
     /// Dependancies that will be loaded into the webpage such as Bootstrap or JQuery.
-    private(set) var dependancies: [Dependancy] = []
+    private(set) var dependancies: [Dependency] = []
     
     
     /// Creates a web page with a head, header, section and footer.
     ///
-    /// - parameter head: The head of the page.
-    /// - parameter header: The header of the page.
-    /// - parameter section: The section element that goes between the header and footer
-    /// - parameter footer: The footer of the page.
-    ///
     /// - returns: A UIWebPage with all the neccasary elements.
-    public init(head: UIElement, header: UIElement, section: UIElement, footer: UIElement) {
-        self.head = head
-        self.header = header
-        self.section = section
-        self.footer = footer
+    public init() {
+        self.head = UIElement(element: .head)
+        self.header = UIElement(element: .header)
+        self.section = UIElement(element: .section)
+        self.footer = UIElement(element: .footer)
     }
     
-    /// Takes the elements and renders them.
-    private func render()throws -> View {
+    /// Creates an instance of `UIWebPage` with the basic required elements.
+    ///
+    /// - Parameter title: The title of the page.
+    convenience public init(title: String) {
+        self.init()
+        self.head.inject("<title>\(title)</title>")
+    }
+    
+    /// For custom configuration of the web page before it is rendered. Over-ride this method to do anything before page rendering.
+    open func configure() {}
+    
+    /// Renders the current page to a View with bytes that can be returned from a droplet route.
+    ///
+    /// - Returns: A view that contains the pages HTML in bytes.
+    /// - Throws: Any errors that get thrown when creating the view.
+    public func render()throws -> View {
+        self.configure()
         var html = ""
         html.append("<!DOCTYPE html>")
-        for dependancy in dependancies {
-            if let cssTags = dependancy.htmlTags[.css] {
+        for dependency in dependancies {
+            if let cssTags = dependency.htmlTags[.css] {
                 for tag in cssTags {
                     head.inject(tag)
                 }
             }
         }
-        html.append(head.parse())
+        html.append(head.render())
         html.append("<body>")
-        html.append(header.parse())
-        html.append(section.parse())
-        html.append(footer.parse())
-        for dependancy in dependancies {
-            if let jsTags = dependancy.htmlTags[.javaScript] {
+        html.append(header.render())
+        html.append(section.render())
+        html.append(footer.render())
+        for dependency in dependancies {
+            if let jsTags = dependency.htmlTags[.javaScript] {
                 for tag in jsTags {
                     html.append(tag)
                 }
@@ -88,7 +99,18 @@ public class UIWebPage {
     /// Adds dependancies that will be loaded into the webpage.
     ///
     /// - Parameter dependancy: The dependancy that will added to the webpage.
-    public func `import`(_ dependancy: Dependancy) {
-        self.dependancies.append(dependancy)
+    public func `import`(_ dependency: Dependency) {
+        self.dependancies.append(dependency)
+    }
+}
+
+extension UIWebPage: ResponseRepresentable {
+    
+    /// Handles auto rendering for routes.
+    ///
+    /// - Returns: A response containing the view from rendering.
+    /// - Throws: Any errors generated from creating the view.
+    public func makeResponse() throws -> Response {
+        return try render().makeResponse()
     }
 }

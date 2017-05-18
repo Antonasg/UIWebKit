@@ -1,6 +1,6 @@
 //  The MIT License (MIT)
 //
-//  Copyright (c) 2016 Caleb Kleveter
+//  Copyright (c) 2017 Caleb Kleveter
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -20,22 +20,19 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-/// Errors that occure when trying to render the HTML.
-public enum RenderError: Error {
+extension String {
     
-    /// Turning the HTML in string form to data failed.
-    case failedStringToData
-}
-
-/// Errors that are thrown when trying to create a .html file from a UIWebPage.
-public enum FileCreationError: Error {
-    
-    /// There is no droplet availible to the UIWebPage, so there is no way to know where the Views folder is.
-    case noDroplet
-    
-    /// The data failed to write to the .html file. This can only happen after the file exists.
-    case dataCannotWrite
-    
-    /// An error occured while getting the name of the current swift file for creating the .html file.
-    case fileNonExisting
+    /// Encodes a string to pervent direct HTML injection to a web page.
+    ///
+    /// - Returns: The encoded string.
+    func safetyHTMLEncoded() -> String {
+        let htmlAsciiCodes: [String: String] = ["<": "&lt;", ">": "&gt;", "/": "&#47;", "(": "&#40;", ")": "&#41;", "{": "&#123;", "}": "&#125;", "\"": "&quot;"]
+        var finalString = ""
+        _ = self.characters.map {
+            if $0.isDangerousAscii() {
+                finalString.append(htmlAsciiCodes[String($0)]!)
+            } else { finalString.append(String($0)) }
+        }
+        return finalString
+    }
 }
